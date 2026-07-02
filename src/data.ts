@@ -6,26 +6,6 @@ import banded_tee_offwhite from './assets/images/banded_tee_offwhite_17819726282
 import categoryPremium from './assets/images/category_premium_1781970056347.jpg';
 import categoryMinimalist from './assets/images/category_minimalist_1781970070878.jpg';
 
-export const HERO_SLIDES: HeroSlide[] = [
-  {
-    label: "EXCLUSIVELY CRAFTED",
-    title: "Premium Men's T-Shirts Collection",
-    buttonText: "SHOP NOW",
-    bgUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuBn6kidpTAT01HWvYPmEJGxhWjder-6DtuGWQxp4rxi91JKconipOUv6Fw-q1W48yobfNXSj9mxVZSlK2tZhCrM9wV_QlwYglI_UyNB6e4_UwqqfMeTXvmJopuC4MY-XY2I-I7NEt7BJE6dDPtuh_musUjdoiDfAcPc5_xq_KrevSAgI1bYSHTCptdqC8oho3VUFAw8naeZju4PrVbl1SkwrDde4BoRMO8AhOiq4Cy-J8yqWcb3XmoBYiYwLsitWJGBKfsePr_ep5QG"
-  },
-  {
-    label: "LOOKBOOK 2026",
-    title: "Summer Collection 2026",
-    buttonText: "EXPLORE LOOKS",
-    bgUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuBnBcGHH1wJPZpDVM5cUw2E-b8bHMrbb6BHoDKZjnDzNp8cJ8ezxJfRGj6mfG4Lw2Bjr6F0Y794WCkEakVKH2cBHjvAowP9pDtm-4NEqyH6tqv4v_g1fvxRVJvPuB0Ms6cTileTLjub3WCcRVh-r6Bo7Zm9aeIIac0kzoHlyTtqGmNhEl8cW6xWWMhJexPDCcIc2bUYoFji69-4Z3J-o4Jdr_pXv6kjgxZ8fdDN82H-obIcDhp2U1j7311mHIarTFuX7QNU4wBacP0m"
-  },
-  {
-    label: "LIMITED OFFER",
-    title: "Buy 2 Get 1 Free",
-    buttonText: "UPDATE WARDROBE",
-    bgUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuB-LbYNxsDm7SmDWGcR1I-kdMS2JqNWwqnyqJ-Jx7EWjIdrJiJ2BAd3tG9rNzgVGu_LImrRCSWJeriGnfqob3jVvXORCJXFkKwgDdmNiYb6sklWjt12kPtFL610uJOl0qBTurtVvQWFgI4e6fbxQQJvzjwUgFLjCQrSzp6PNyZMGjM8dmVam9HopxtstnMmvVb7zVMQ0--8DsaxrjJnLJjSkC2IQDYXO1OgdKmvkYgEFh-V5MChBJ-TrK9KHByZiSopBTFv646VaNiK"
-  }
-];
 
 export const INITIAL_CATEGORIES: CategoryItem[] = [
   {
