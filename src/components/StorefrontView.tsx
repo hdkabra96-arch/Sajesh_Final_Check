@@ -80,7 +80,7 @@ export default function StorefrontView({
       className="pb-16"
     >
       {/* Hero Slider Section */}
-      <section className="relative h-[80vh] md:h-[85vh] overflow-hidden bg-black text-white" id="hero-slider-section">
+      <section className="relative h-[55vh] sm:h-[80vh] md:h-[85vh] min-h-[420px] sm:min-h-[600px] overflow-hidden bg-black text-white" id="hero-slider-section">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentSlide}
@@ -88,21 +88,26 @@ export default function StorefrontView({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.8 }}
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url('${currentHero.bgUrl}')` }}
+            className="absolute inset-0 w-full h-full"
           >
+            <img 
+              src={currentHero.bgUrl} 
+              alt={currentHero.title}
+              referrerPolicy="no-referrer"
+              className="w-full h-full object-cover object-center"
+            />
             {/* Ambient Dark overlay matching design guideline (no generic purple gradients) */}
-            <div className="absolute inset-0 bg-black/35" />
+            <div className="absolute inset-0 bg-black/40" />
           </motion.div>
         </AnimatePresence>
 
         {/* Content Layout */}
-        <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-6 z-10">
+        <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4 sm:px-8 md:px-16 lg:px-24 py-8 z-10">
           <motion.span
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="font-['Hanken_Grotesk'] text-xs font-bold tracking-[0.3em] text-white/90 mb-4"
+            className="font-['Hanken_Grotesk'] text-[10px] sm:text-xs font-bold tracking-[0.3em] text-white/90 mb-2 sm:mb-4"
           >
             {currentHero.label}
           </motion.span>
@@ -110,7 +115,7 @@ export default function StorefrontView({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3, duration: 0.6 }}
-            className="font-['Bodoni_Moda'] text-4xl md:text-7xl font-bold text-white mb-8 max-w-4xl tracking-tight leading-tight"
+            className="font-['Bodoni_Moda'] text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 sm:mb-8 max-w-[90%] sm:max-w-4xl tracking-tight leading-snug sm:leading-tight"
           >
             {currentHero.title}
           </motion.h1>
@@ -123,14 +128,14 @@ export default function StorefrontView({
               setActiveView('shop');
             }}
             id="hero-shop-now-btn"
-            className="px-12 py-4 bg-white text-black font-['Hanken_Grotesk'] text-xs font-semibold tracking-widest uppercase hover:bg-neutral-200 hover:scale-105 active:scale-95 transition-all duration-300 pointer-events-auto cursor-pointer"
+            className="px-8 py-3 sm:px-12 sm:py-4 bg-white text-black font-['Hanken_Grotesk'] text-[10px] sm:text-xs font-semibold tracking-widest uppercase hover:bg-neutral-200 hover:scale-105 active:scale-95 transition-all duration-300 pointer-events-auto cursor-pointer"
           >
             {currentHero.buttonText}
           </motion.button>
         </div>
 
         {/* Slider Indicator Dots */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-4 z-20">
+        <div className="absolute bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 flex gap-4 z-20">
           {heroSlides.map((_, index) => (
             <button
               key={index}
