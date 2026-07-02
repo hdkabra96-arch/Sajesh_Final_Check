@@ -1,0 +1,6 @@
+{
+  "name": "DUODRIP",
+  "description": "Premium e-commerce storefront, catalog, and admin portal for DUODRIP luxury men's t-shirts and essentials.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

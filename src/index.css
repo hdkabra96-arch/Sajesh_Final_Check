@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400..900;1,400..900&family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-headline-lg: "Bodoni Moda", serif;
+  --font-display-lg: "Bodoni Moda", serif;
+  --font-display-lg-mobile: "Bodoni Moda", serif;
+  --font-headline-sm: "Bodoni Moda", serif;
+  --font-body-md: "Hanken Grotesk", sans-serif;
+  --font-body-lg: "Hanken Grotesk", sans-serif;
+  --font-label-caps: "Hanken Grotesk", sans-serif;
+  --font-price-lg: "Hanken Grotesk", sans-serif;
+
+  --color-brand-primary: #000000;
+  --color-brand-secondary: #5d5f5f;
+  --color-brand-background: #fbf9f9;
+  --color-brand-surface: #fbf9f9;
+  --color-brand-container: #efeded;
+  --color-brand-accent: #00419e;
+}
+
+@layer base {
+  body {
+    background-color: #fbf9f9;
+    color: #1b1c1c;
+    font-family: "Hanken Grotesk", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d1d1;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #000;
+}
+
+/* Custom fade utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
