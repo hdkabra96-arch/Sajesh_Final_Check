@@ -46,7 +46,7 @@ export default function App() {
   // Hero Banners and Categories dynamic configurations
   const [heroSlides, setHeroSlides] = React.useState<HeroSlide[]>(() => {
     const cached = localStorage.getItem('duodrip_hero_slides');
-    return cached ? JSON.parse(cached) : HERO_SLIDES;
+    return cached ? JSON.parse(cached) : [];
   });
 
   const [categories, setCategories] = React.useState<CategoryItem[]>(() => {
@@ -111,6 +111,12 @@ export default function App() {
           console.log('🌱 Seeding initial slides to Supabase...');
           await saveHeroSlidesToDb(HERO_SLIDES);
           setHeroSlides(HERO_SLIDES);
+        } else if (!dbSlides) {
+          // If fetch failed and we have nothing cached, use HERO_SLIDES as fallback
+          const cached = localStorage.getItem('duodrip_hero_slides');
+          if (!cached) {
+            setHeroSlides(HERO_SLIDES);
+          }
         }
 
         if (dbCategories && dbCategories.length > 0) {
