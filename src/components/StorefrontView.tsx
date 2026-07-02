@@ -54,6 +54,18 @@ export default function StorefrontView({
     }
   };
 
+  if (heroSlides.length === 0) {
+    return (
+      <div className="h-[80vh] md:h-[85vh] bg-black flex flex-col items-center justify-center text-white" id="hero-slider-loader">
+        <div className="animate-pulse flex flex-col items-center text-center px-6">
+          <span className="font-['Bodoni_Moda'] text-2xl md:text-3xl font-light tracking-[0.4em] uppercase text-gray-300 mb-2">DUODRIP</span>
+          <div className="w-12 h-[1px] bg-white/20 mb-6"></div>
+          <p className="font-['Hanken_Grotesk'] text-[10px] font-bold tracking-[0.2em] text-white/50 uppercase">Loading collection...</p>
+        </div>
+      </div>
+    );
+  }
+
   const currentHero = heroSlides[currentSlide] || heroSlides[0];
 
   // Get the 4 featured products for "New Arrivals"
