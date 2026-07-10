@@ -8,6 +8,7 @@ import {
   fetchOrdersFromDb,
   insertOrderInDb,
   updateOrderStatusInDb,
+  updateOrderPaymentStatusInDb,
   fetchHeroSlidesFromDb,
   saveHeroSlidesToDb,
   fetchCategoriesFromDb,
@@ -30,6 +31,7 @@ import ShippingReturnsView from './components/ShippingReturnsView';
 import CartDrawer from './components/CartDrawer';
 import ProductQuickView from './components/ProductQuickView';
 import UserProfileModal from './components/UserProfileModal';
+import OrderConfirmationView from './components/OrderConfirmationView';
 
 import { Sparkles, Heart, Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -37,6 +39,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 export default function App() {
   // Navigation State
   const [activeView, setActiveView] = React.useState<ActiveView>('storefront');
+  const [confirmedOrder, setConfirmedOrder] = React.useState<RecentOrder | null>(null);
 
   // Scroll to top on view changes
   React.useEffect(() => {
@@ -168,8 +171,13 @@ export default function App() {
       } else {
         next.forEach((o) => {
           const old = prev.find(oldOrder => oldOrder.id === o.id);
-          if (old && old.status !== o.status) {
-            updateOrderStatusInDb(o.id, o.status);
+          if (old) {
+            if (old.status !== o.status) {
+              updateOrderStatusInDb(o.id, o.status);
+            }
+            if (old.paymentStatus !== o.paymentStatus) {
+              updateOrderPaymentStatusInDb(o.id, o.paymentStatus || 'Pending');
+            }
           }
         });
       }
@@ -309,8 +317,10 @@ export default function App() {
     color?: string;
     quantity?: number;
     whatsAppSent?: boolean;
-    status?: 'Shipped' | 'Processing' | 'Delivered' | 'Hold' | 'Pending';
-  }) => {
+    status?: 'Shipped' | 'Processing' | 'Delivered' | 'Hold' | 'Pending' | 'Confirmed';
+    paymentMethod?: string;
+    paymentStatus?: 'Pending' | 'Paid' | 'Failed' | 'Refunded';
+  }): RecentOrder => {
     const initials = newOrderData.customerName
       .split(' ')
       .map((word) => word[0])
@@ -324,7 +334,7 @@ export default function App() {
       customerName: newOrderData.customerName,
       productName: newOrderData.productName,
       amount: newOrderData.amount,
-      status: newOrderData.status || 'Pending',
+      status: newOrderData.status || 'Confirmed',
       date: new Date().toISOString().split('T')[0],
       phone: newOrderData.phone,
       email: newOrderData.email,
@@ -333,10 +343,13 @@ export default function App() {
       size: newOrderData.size,
       color: newOrderData.color,
       quantity: newOrderData.quantity,
-      whatsAppSent: newOrderData.whatsAppSent ?? true
+      whatsAppSent: newOrderData.whatsAppSent ?? false,
+      paymentMethod: newOrderData.paymentMethod || 'COD',
+      paymentStatus: newOrderData.paymentStatus || 'Pending'
     };
 
     setOrders((prev) => [newOrder, ...prev]);
+    return newOrder;
   };
 
   // Favourites Wishlist Toggle
@@ -519,6 +532,15 @@ export default function App() {
               <ShippingReturnsView />
             </div>
           )}
+
+          {activeView === 'order-confirmation' && (
+            <div key="order-confirmation-wrap">
+              <OrderConfirmationView
+                order={confirmedOrder}
+                onContinueShopping={() => setActiveView('storefront')}
+              />
+            </div>
+          )}
         </AnimatePresence>
       </div>
 
@@ -537,6 +559,10 @@ export default function App() {
         userProfile={userProfile}
         onSaveProfile={handleSaveProfile}
         onOpenProfileModal={() => setProfileModalOpen(true)}
+        onCheckoutSuccess={(order) => {
+          setConfirmedOrder(order);
+          setActiveView('order-confirmation');
+        }}
       />
 
       {/* Dynamic Popover Product Quickview Modal */}

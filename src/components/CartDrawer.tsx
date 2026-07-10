@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CartItem, UserProfile } from '../types';
+import { CartItem, UserProfile, RecentOrder } from '../types';
 import { X, Trash2, Plus, Minus, CreditCard, ShoppingBag, CheckCircle, Tag, Sparkles, UserCheck, MessageCircle, AlertCircle, Send, Check } from 'lucide-react';
+import { PaymentProcessors, PaymentMethodId } from '../services/paymentService';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -22,11 +23,14 @@ interface CartDrawerProps {
     color?: string;
     quantity?: number;
     whatsAppSent?: boolean;
-    status?: 'Shipped' | 'Processing' | 'Delivered' | 'Hold' | 'Pending';
-  }) => void;
+    status?: 'Shipped' | 'Processing' | 'Delivered' | 'Hold' | 'Pending' | 'Confirmed';
+    paymentMethod?: string;
+    paymentStatus?: 'Pending' | 'Paid' | 'Failed' | 'Refunded';
+  }) => RecentOrder;
   userProfile: UserProfile | null;
   onSaveProfile: (profile: UserProfile) => void;
   onOpenProfileModal: () => void;
+  onCheckoutSuccess?: (order: RecentOrder) => void;
 }
 
 export default function CartDrawer({
@@ -39,7 +43,8 @@ export default function CartDrawer({
   onAddOrder,
   userProfile,
   onSaveProfile,
-  onOpenProfileModal
+  onOpenProfileModal,
+  onCheckoutSuccess
 }: CartDrawerProps) {
   const [promoCode, setPromoCode] = React.useState('');
   const [discountPercent, setDiscountPercent] = React.useState(0);
@@ -58,8 +63,12 @@ export default function CartDrawer({
   const [checkoutCountry, setCheckoutCountry] = React.useState('');
   const [checkoutNotes, setCheckoutNotes] = React.useState('');
   const [saveToProfile, setSaveToProfile] = React.useState(true);
-  
-  // Order Summary state before redirecting to WhatsApp
+
+  // Payment states
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState<PaymentMethodId>('COD');
+  const [checkoutValidationError, setCheckoutValidationError] = React.useState('');
+
+  // Order Summary state before redirecting to WhatsApp (backward compatibility for Online Payment if selected)
   const [showOrderSummary, setShowOrderSummary] = React.useState(false);
   const [errorOpeningWhatsApp, setErrorOpeningWhatsApp] = React.useState(false);
   const [checkoutSuccess, setCheckoutSuccess] = React.useState(false);
@@ -101,8 +110,17 @@ export default function CartDrawer({
     return subtotal - discountAmount;
   }, [subtotal, discountAmount]);
 
-  const handleCheckoutSubmit = (e: React.FormEvent) => {
+  const handleCheckoutSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setCheckoutValidationError('');
+
+    // 1. Check if cart is empty
+    if (cart.length === 0) {
+      setCheckoutValidationError('Your shopping cart is empty.');
+      return;
+    }
+
+    // 2. Validate all required customer info
     if (
       !checkoutName.trim() ||
       !checkoutEmail.trim() ||
@@ -113,13 +131,100 @@ export default function CartDrawer({
       !checkoutZip.trim() ||
       !checkoutCountry.trim()
     ) {
+      setCheckoutValidationError('Please fill in all required customer details.');
       return;
     }
 
-    // Generate Order ID early
-    const newId = `STM-${Math.floor(10000 + Math.random() * 90000)}`;
-    setCreatedOrderId(newId);
-    setShowOrderSummary(true);
+    // 3. Validate phone number format (10-15 digits, spaces/hyphens allowed)
+    const phoneRegex = /^\+?[0-9\s\-]{10,15}$/;
+    if (!phoneRegex.test(checkoutPhone.trim())) {
+      setCheckoutValidationError('Invalid phone number. Please enter a valid 10-15 digit phone number.');
+      return;
+    }
+
+    // If COD, place order immediately. If online payment selected, trigger online flow.
+    if (selectedPaymentMethod === 'COD') {
+      try {
+        const processor = PaymentProcessors.COD;
+        const details = {
+          orderId: '',
+          amount: total,
+          customerName: checkoutName,
+          email: checkoutEmail,
+          phone: checkoutPhone,
+          address: `${checkoutAddress}, ${checkoutCity}, ${checkoutState} - ${checkoutZip}, ${checkoutCountry}`,
+          city: checkoutCity,
+          state: checkoutState,
+          zip: checkoutZip,
+          country: checkoutCountry
+        };
+
+        const result = await processor.processPayment(details);
+        if (result.success) {
+          const firstItem = cart[0];
+          const newOrder = onAddOrder({
+            customerName: checkoutName,
+            productName: cart.map(item => `${item.quantity}x ${item.product.name} (${item.selectedSize})`).join(', '),
+            amount: total,
+            phone: checkoutPhone,
+            email: checkoutEmail,
+            address: `${checkoutAddress}, ${checkoutCity}, ${checkoutState} - ${checkoutZip}, ${checkoutCountry}`,
+            productId: firstItem?.product.id,
+            size: firstItem?.selectedSize,
+            color: firstItem?.product.color,
+            quantity: cart.reduce((acc, item) => acc + item.quantity, 0),
+            whatsAppSent: false,
+            status: 'Confirmed', // Set Order Status = Confirmed
+            paymentMethod: 'COD', // Set Payment Method = Cash on Delivery
+            paymentStatus: result.paymentStatus as any // Set Payment Status = Pending
+          });
+
+          // Save profile if checked
+          if (saveToProfile) {
+            onSaveProfile({
+              name: checkoutName,
+              email: checkoutEmail,
+              phone: checkoutPhone,
+              address: checkoutAddress,
+              city: checkoutCity,
+              zip: checkoutZip,
+              preferredSize: userProfile?.preferredSize || firstItem?.selectedSize || ''
+            });
+          }
+
+          setCheckoutSuccess(true);
+          
+          if (onCheckoutSuccess) {
+            onCheckoutSuccess(newOrder);
+          }
+
+          // Clear cart and reset states
+          onClearCart();
+          setIsCheckingOut(false);
+          setCheckoutSuccess(false);
+          setCheckoutName('');
+          setCheckoutEmail('');
+          setCheckoutPhone('');
+          setCheckoutAddress('');
+          setCheckoutCity('');
+          setCheckoutState('');
+          setCheckoutZip('');
+          setCheckoutCountry('');
+          setCheckoutNotes('');
+          onClose();
+        } else {
+          setCheckoutValidationError(result.error || 'COD payment verification failed.');
+        }
+      } catch (err: any) {
+        console.error('Order creation error:', err);
+        setCheckoutValidationError(err?.message || 'An unexpected error occurred during order processing.');
+      }
+    } else {
+      // Legacy WhatsApp / Online Payment flow
+      const newId = `STM-${Math.floor(10000 + Math.random() * 90000)}`;
+      setCreatedOrderId(newId);
+      setShowOrderSummary(true);
+    }
   };
 
   const getWhatsAppUrl = () => {
@@ -565,8 +670,15 @@ Thank you.`;
               <form onSubmit={handleCheckoutSubmit} className="space-y-4">
                 <div className="border-b border-black/10 pb-3 text-left">
                   <h3 className="font-['Bodoni_Moda'] text-xl font-bold text-black uppercase">Checkout Details</h3>
-                  <p className="font-['Hanken_Grotesk'] text-[10px] text-gray-400 mt-0.5 uppercase">DUODRIP WhatsApp Purchase Route</p>
+                  <p className="font-['Hanken_Grotesk'] text-[10px] text-gray-400 mt-0.5 uppercase">DUODRIP Checkout & Payment Desk</p>
                 </div>
+
+                {checkoutValidationError && (
+                  <div className="p-3 bg-red-50 border border-red-250 text-red-700 text-xs text-left leading-relaxed font-sans flex gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                    <span>{checkoutValidationError}</span>
+                  </div>
+                )}
 
                 {/* Profile integration indicator */}
                 {userProfile ? (
@@ -707,6 +819,54 @@ Thank you.`;
                     />
                   </div>
 
+                  {/* Modern Payment Selector cards */}
+                  <div className="sm:col-span-2 space-y-2 mt-2">
+                    <label className="block text-[9px] font-bold uppercase tracking-widest text-gray-550">
+                      2. Choose Payment Method *
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {/* Cash on Delivery (COD) Card */}
+                      <div
+                        onClick={() => setSelectedPaymentMethod('COD')}
+                        className={`border p-3 cursor-pointer flex flex-col justify-between transition-all select-none ${
+                          selectedPaymentMethod === 'COD'
+                            ? 'border-black bg-neutral-50 shadow-sm'
+                            : 'border-black/10 hover:border-black/30 bg-white'
+                        }`}
+                      >
+                        <div className="flex justify-between items-center w-full">
+                          <span className="font-['Hanken_Grotesk'] text-xs font-bold text-black uppercase">
+                            Cash on Delivery
+                          </span>
+                          <span className="text-[10px] text-green-600 font-bold font-sans">
+                            ✔ Available
+                          </span>
+                        </div>
+                        <p className="text-[9px] text-gray-500 mt-2 font-sans leading-snug">
+                          Pay in cash or show scanner upon delivery of items.
+                        </p>
+                      </div>
+
+                      {/* Online Payment (Razorpay/Coming Soon) Card */}
+                      <div
+                        className="border border-black/5 bg-neutral-100/50 p-3 opacity-60 cursor-not-allowed flex flex-col justify-between select-none"
+                        title="Online Payments will be available soon."
+                      >
+                        <div className="flex justify-between items-center w-full">
+                          <span className="font-['Hanken_Grotesk'] text-xs font-bold text-gray-400 uppercase">
+                            Online Payment
+                          </span>
+                          <span className="text-[9px] text-amber-700 font-bold bg-amber-50 px-1 py-0.5 uppercase tracking-wider scale-90">
+                            Coming Soon
+                          </span>
+                        </div>
+                        <p className="text-[9px] text-gray-400 mt-2 font-sans leading-snug">
+                          Online Payments will be available soon.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="sm:col-span-2">
                     <label className="block text-[9px] font-bold uppercase tracking-widest text-gray-500 mb-1">Order Notes (Optional)</label>
                     <textarea
@@ -745,7 +905,7 @@ Thank you.`;
                   id="checkout-finalize-btn"
                   className="w-full py-3.5 bg-black text-white hover:bg-neutral-800 font-['Hanken_Grotesk'] text-xs font-bold tracking-widest uppercase transition-colors cursor-pointer"
                 >
-                  PLACE ORDER ON WHATSAPP
+                  {selectedPaymentMethod === 'COD' ? 'PLACE ORDER (CASH ON DELIVERY)' : 'PLACE ORDER ON WHATSAPP'}
                 </button>
               </form>
             )}

@@ -262,7 +262,7 @@ export default function UserProfileModal({
                           const isSuccess = order.status === 'Delivered' || order.status === 'Shipped';
                           return (
                             <div key={`user-order-${order.id || oIdx}-${oIdx}`} className="p-3.5 bg-white flex justify-between items-center gap-4 hover:bg-[#fbf9f9]">
-                              <div className="text-left font-['Hanken_Grotesk'] space-y-1">
+                              <div className="text-left font-['Hanken_Grotesk'] space-y-1 flex-1">
                                 <div className="flex items-center gap-2">
                                   <span className="font-mono text-[10px] bg-neutral-100 text-black px-1.5 py-0.5 font-bold uppercase">
                                     {order.id}
@@ -272,9 +272,17 @@ export default function UserProfileModal({
                                 <h4 className="text-xs font-bold text-black line-clamp-1">
                                   {order.productName}
                                 </h4>
-                                <p className="text-[10px] text-gray-500 font-medium">
-                                  Total Charge: <strong className="text-black font-semibold font-mono">₹{order.amount.toFixed(2)}</strong>
-                                </p>
+                                <div className="text-[10px] text-gray-500 font-medium space-y-0.5 mt-1.5">
+                                  <div>Total Charge: <strong className="text-black font-semibold font-mono">₹{order.amount.toFixed(2)}</strong></div>
+                                  <div className="flex gap-4">
+                                    <span>Method: <strong className="text-black font-semibold uppercase">{order.paymentMethod || 'COD'}</strong></span>
+                                    <span>Payment: <strong className={`font-semibold uppercase ${
+                                      order.paymentStatus === 'Paid' ? 'text-green-700' :
+                                      order.paymentStatus === 'Failed' ? 'text-red-700' :
+                                      'text-amber-700'
+                                    }`}>{order.paymentStatus || 'Pending'}</strong></span>
+                                  </div>
+                                </div>
                               </div>
 
                               <div className="text-right flex flex-col items-end gap-1.5 shrink-0">
@@ -282,8 +290,12 @@ export default function UserProfileModal({
                                   className={`font-mono text-[9px] uppercase font-bold px-2 py-0.5 tracking-wider ${
                                     order.status === 'Delivered'
                                       ? 'bg-green-100 text-green-700'
+                                      : order.status === 'Shipped'
+                                      ? 'bg-indigo-150 text-indigo-850'
                                       : order.status === 'Processing'
                                       ? 'bg-blue-100 text-blue-700'
+                                      : order.status === 'Confirmed'
+                                      ? 'bg-emerald-100 text-emerald-800'
                                       : order.status === 'Hold'
                                       ? 'bg-yellow-101 text-yellow-800'
                                       : 'bg-black text-white'

@@ -82,6 +82,10 @@ CREATE TABLE IF NOT EXISTS public.orders (
     customer_initial text,
     product_name text,
     email text,
+    payment_method text DEFAULT 'COD',
+    "paymentMethod" text DEFAULT 'COD',
+    payment_status text DEFAULT 'Pending',
+    "paymentStatus" text DEFAULT 'Pending',
     created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 

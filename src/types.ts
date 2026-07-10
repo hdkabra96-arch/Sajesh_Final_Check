@@ -28,7 +28,7 @@ export interface RecentOrder {
   customerName: string;
   productName: string;
   amount: number;
-  status: 'Shipped' | 'Processing' | 'Delivered' | 'Hold' | 'Pending';
+  status: 'Shipped' | 'Processing' | 'Delivered' | 'Hold' | 'Pending' | 'Confirmed';
   date: string;
   phone?: string;
   email?: string;
@@ -38,6 +38,8 @@ export interface RecentOrder {
   color?: string;
   quantity?: number;
   whatsAppSent?: boolean;
+  paymentMethod?: string;
+  paymentStatus?: 'Pending' | 'Paid' | 'Failed' | 'Refunded';
 }
 
 export interface FilterState {
@@ -50,7 +52,7 @@ export interface FilterState {
 
 export type SortingType = 'Newest' | 'PriceHighToLow' | 'PriceLowToHigh' | 'BestSellers';
 
-export type ActiveView = 'storefront' | 'shop' | 'admin' | 'about' | 'contact' | 'privacy' | 'shipping-returns' | 'profile';
+export type ActiveView = 'storefront' | 'shop' | 'admin' | 'about' | 'contact' | 'privacy' | 'shipping-returns' | 'profile' | 'order-confirmation';
 export type AdminSection = 'dashboard' | 'inventory' | 'orders' | 'customers' | 'banners' | 'analytics' | 'instagram';
 
 export interface HeroSlide {

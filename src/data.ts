@@ -378,3 +378,27 @@ export const INITIAL_USER_PROFILES: UserProfile[] = [
   }
 ];
 
+export const HERO_SLIDES: HeroSlide[] = [
+  {
+    id: "slide-1",
+    label: "ARCHIVE BOX COLLAR",
+    title: "Minimalist Oversized Ribbed Cotton Essentials",
+    buttonText: "SHOP ARRIVALS",
+    bgUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuDwk9UDH6VT1tli01IXEmrhA7bwrFZAJk9Dx-Jjq1SOD5Nj0fJmM_59bU8wGXOsYh3rc8CWOxcJhmSaER5STWV-mMm5K5_PqLdnJnwt6XuCHDQbAQy4FFLRwfKcvzJaQuAuNpr5ebet-lXHpj3nKvwZisCYN6mTmFoTtJrbsrQU9k956H8pkTxczjzjSNBiN0CA2Zq3NLLGFq0FTojtDXc4VWbgofFMOz7R9VxUaCFJVMIG73KrmP9tClwjCRREfT5tTyncXVJyKSwd"
+  },
+  {
+    id: "slide-2",
+    label: "SIGNATURE PREMIUM DRESSING",
+    title: "Luxury Silk-Cotton Double Knitted Heavyweight Polos",
+    buttonText: "EXPLORE COLLECTION",
+    bgUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuDHJ36mkZ4xwdU7dkd7ITN78YASjm-6LBwrnGPHpTsiFA8PiL_eid3SZiIzeU-53eIEFUnYrezv5bN3YeaHKpAN8h5U7q0u-JHAY5HpaQmcnmTTa_9XT_6m6FzX2im9f-MG22QuX7C59IuijR5UM2AjOlGdZ2g749hND58lRjjCL4ij3lPfoVF7F5gdmbTmKZbMW8m2aaPOd8xM92Xg_cSOCp4vfidyd8rKnHziNWqOejF2PJnXPX0STzlKhm9PE4fCu5BSwGlGtyng"
+  },
+  {
+    id: "slide-3",
+    label: "THE BACKSTORY CUT",
+    title: "Relaxed Terrain Textured Knit Silhouettes",
+    buttonText: "VIEW GARMENTS",
+    bgUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuC3QtIBR-BdJRUCbrgQ2wD55Me5EUuOnov3Q9iP-dWGN5rq6mHNEpWD85LlyVncquv-8mv8-ly63jWlM3332ZLfp7-4DeE09mDhPdcuHppKlcL-5mq98JWSn_Ucuj61bRtA-SEG-trnin4uyKHOxWEuAHMA6R_c5nNjLTdvKiiQhX_EQdnjxTnQTdo7ovjYd9D7fgzedxvWGWpR4dHElz9njfc5Jyi8CFHP38NmDyoMMgHeRvIJNGPWzVaH7KPh__4Ckymh2G_m95Mt"
+  }
+];
+

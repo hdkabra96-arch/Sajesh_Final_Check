@@ -211,11 +211,16 @@ export async function fetchOrdersFromDb(): Promise<RecentOrder[] | null> {
 
     const dbOrders = data as RecentOrder[];
     return dbOrders.map(o => {
+      const mappedOrder: RecentOrder = {
+        ...o,
+        paymentMethod: (o as any).paymentMethod || (o as any).payment_method || 'COD',
+        paymentStatus: (o as any).paymentStatus || (o as any).payment_status || 'Pending'
+      };
       const initial = INITIAL_ORDERS.find(i => i.id === o.id);
       if (initial) {
-        return { ...initial, ...o };
+        return { ...initial, ...mappedOrder };
       }
-      return o;
+      return mappedOrder;
     });
   } catch (err) {
     console.error('❌ Supabase orders fetch crash:', err);
@@ -247,7 +252,11 @@ export async function insertOrderInDb(order: RecentOrder): Promise<boolean> {
     color: order.color,
     quantity: order.quantity,
     whatsAppSent: order.whatsAppSent ?? true,
-    whatsapp_sent: order.whatsAppSent ?? true
+    whatsapp_sent: order.whatsAppSent ?? true,
+    paymentMethod: order.paymentMethod || 'COD',
+    payment_method: order.paymentMethod || 'COD',
+    paymentStatus: order.paymentStatus || 'Pending',
+    payment_status: order.paymentStatus || 'Pending'
   };
   return safeInsert('orders', payload);
 }
@@ -266,6 +275,27 @@ export async function updateOrderStatusInDb(orderId: string, status: string): Pr
     return true;
   } catch (err) {
     console.error('❌ Supabase order status update crash:', err);
+    return false;
+  }
+}
+
+export async function updateOrderPaymentStatusInDb(orderId: string, paymentStatus: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('orders')
+      .update({
+        paymentStatus,
+        payment_status: paymentStatus
+      })
+      .eq('id', orderId);
+
+    if (error) {
+      console.error('❌ Supabase order payment status update error:', error.message);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error('❌ Supabase order payment status update crash:', err);
     return false;
   }
 }

@@ -487,9 +487,16 @@ export default function AdminView({
   };
 
   // Change Status of orders
-  const handleUpdateOrderStatus = (orderId: string, nextStatus: 'Shipped' | 'Processing' | 'Delivered' | 'Hold') => {
+  const handleUpdateOrderStatus = (orderId: string, nextStatus: 'Shipped' | 'Processing' | 'Delivered' | 'Hold' | 'Pending' | 'Confirmed') => {
     setOrders(prev =>
       prev.map(o => (o.id === orderId ? { ...o, status: nextStatus } : o))
+    );
+  };
+
+  // Change Payment Status of orders
+  const handleUpdateOrderPaymentStatus = (orderId: string, nextPaymentStatus: 'Pending' | 'Paid' | 'Failed' | 'Refunded') => {
+    setOrders(prev =>
+      prev.map(o => (o.id === orderId ? { ...o, paymentStatus: nextPaymentStatus } : o))
     );
   };
 
@@ -1196,15 +1203,17 @@ export default function AdminView({
                 </div>
 
                 <div className="overflow-x-auto border border-black/5">
-                  <table className="w-full min-w-[700px] border-collapse text-left">
+                  <table className="w-full min-w-[900px] border-collapse text-left">
                     <thead>
                       <tr className="bg-[#efeded]/60 border-b border-black/10 font-['Hanken_Grotesk'] text-[10px] tracking-widest text-gray-550 uppercase">
                         <th className="p-4">Order ID & Date</th>
-                        <th className="p-4">Client Name</th>
-                        <th className="p-4">Silhouettes</th>
-                        <th className="p-4 text-right">Total sum</th>
-                        <th className="p-4 text-center">Status Tag</th>
-                        <th className="p-4 text-right">Dispatch Control</th>
+                        <th className="p-4">Client Name & Mobile</th>
+                        <th className="p-4">Delivery Address</th>
+                        <th className="p-4">Ordered Products</th>
+                        <th className="p-4 text-right">Order Total</th>
+                        <th className="p-4">Payment Method</th>
+                        <th className="p-4 text-center">Order Status</th>
+                        <th className="p-4 text-right">Status Controls</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-black/5 font-['Hanken_Grotesk'] text-xs">
@@ -1223,39 +1232,73 @@ export default function AdminView({
                             </td>
                             <td className="p-4">
                               <div className="flex items-center gap-2">
-                                <span className="w-6 h-6 rounded-full bg-black text-white text-[9px] font-bold flex items-center justify-center">
+                                <span className="w-6 h-6 rounded-full bg-black text-white text-[9px] font-bold flex items-center justify-center shrink-0">
                                   {o.customerInitial}
                                 </span>
-                                <span className="text-gray-850 font-semibold">{o.customerName}</span>
+                                <div>
+                                  <span className="text-gray-850 font-semibold block">{o.customerName}</span>
+                                  <span className="text-[10px] font-mono text-gray-400 block mt-0.5">{o.phone || 'N/A'}</span>
+                                </div>
                               </div>
                             </td>
-                            <td className="p-4 text-gray-600 truncate max-w-[200px]" title={o.productName}>
+                            <td className="p-4 text-gray-650 text-[11px] max-w-[150px] truncate" title={o.address}>
+                              {o.address || 'N/A'}
+                            </td>
+                            <td className="p-4 text-gray-600 truncate max-w-[180px]" title={o.productName}>
                               {o.productName}
                             </td>
                             <td className="p-4 text-right font-bold text-black">
                               ₹{o.amount.toFixed(2)}
+                            </td>
+                            <td className="p-4">
+                              <span className="font-semibold text-black uppercase block text-[10px]">{o.paymentMethod || 'COD'}</span>
+                              <span className={`inline-block px-1.5 py-0.5 text-[8px] font-bold tracking-wider uppercase rounded mt-0.5 ${
+                                o.paymentStatus === 'Paid' ? 'bg-green-100 text-green-700' :
+                                o.paymentStatus === 'Failed' ? 'bg-red-100 text-red-700' :
+                                'bg-orange-100 text-orange-800'
+                              }`}>
+                                {o.paymentStatus || 'Pending'}
+                              </span>
                             </td>
                             <td className="p-4 text-center">
                               <span className={`inline-block px-2.5 py-1 text-[9px] font-bold tracking-widest uppercase rounded ${
                                 o.status === 'Shipped' ? 'bg-indigo-150 text-indigo-850' :
                                 o.status === 'Processing' ? 'bg-amber-100 text-amber-800' :
                                 o.status === 'Delivered' ? 'bg-green-150 text-green-850' :
+                                o.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-800' :
                                 'bg-orange-100 text-orange-850'
                               }`}>
                                 {o.status}
                               </span>
                             </td>
-                            <td className="p-4 text-right">
-                              <select
-                                value={o.status}
-                                onChange={(e) => handleUpdateOrderStatus(o.id, e.target.value as any)}
-                                className="border border-black/10 rounded p-1 text-[10px] font-bold tracking-wider bg-white uppercase cursor-pointer"
-                              >
-                                <option value="Processing">Processing</option>
-                                <option value="Shipped">Shipped</option>
-                                <option value="Delivered">Delivered</option>
-                                <option value="Hold">Hold</option>
-                              </select>
+                            <td className="p-4 text-right space-y-1.5">
+                              <div>
+                                <label className="block text-[8px] font-bold uppercase tracking-wider text-gray-400 mb-0.5 text-left">Order Status</label>
+                                <select
+                                  value={o.status}
+                                  onChange={(e) => handleUpdateOrderStatus(o.id, e.target.value as any)}
+                                  className="border border-black/10 rounded p-1 text-[10px] font-bold tracking-wider bg-white uppercase cursor-pointer w-full"
+                                >
+                                  <option value="Confirmed">Confirmed</option>
+                                  <option value="Processing">Processing</option>
+                                  <option value="Shipped">Shipped</option>
+                                  <option value="Delivered">Delivered</option>
+                                  <option value="Hold">Hold</option>
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-[8px] font-bold uppercase tracking-wider text-gray-400 mb-0.5 text-left">Payment Status</label>
+                                <select
+                                  value={o.paymentStatus || 'Pending'}
+                                  onChange={(e) => handleUpdateOrderPaymentStatus(o.id, e.target.value as any)}
+                                  className="border border-black/10 rounded p-1 text-[10px] font-bold tracking-wider bg-white uppercase cursor-pointer w-full"
+                                >
+                                  <option value="Pending">Pending</option>
+                                  <option value="Paid">Paid</option>
+                                  <option value="Failed">Failed</option>
+                                  <option value="Refunded">Refunded</option>
+                                </select>
+                              </div>
                             </td>
                           </tr>
                         ))}
